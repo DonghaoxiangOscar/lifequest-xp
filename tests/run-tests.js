@@ -1,0 +1,113 @@
+import assert from "node:assert/strict";
+import { parseActivities } from "../src/utils/parser.js";
+import { analyzeEntry, analyzeParsedActivities } from "../src/utils/scoring.js";
+import { buildGameState } from "../src/utils/stats.js";
+import { createEmptyEntries } from "../src/utils/initialData.js";
+import { createEntry } from "../src/utils/storage.js";
+import { translate } from "../src/i18n/translations.js";
+import { buildRuleBasedDailyReport } from "../src/utils/report.js";
+
+function runTest(name, testFn) {
+  try {
+    testFn();
+    console.log(`PASS ${name}`);
+  } catch (error) {
+    console.error(`FAIL ${name}`);
+    throw error;
+  }
+}
+
+runTest("parser converts natural language into structured activities", () => {
+  const result = parseActivities("Today I studied linear algebra for 2 hours and ran 30 minutes");
+
+  assert.equal(result.needsAi, false);
+  assert.equal(result.activities.length, 2);
+  assert.deepEqual(
+    result.activities.map((activity) => ({
+      type: activity.type,
+      duration: activity.duration,
+      category: activity.category,
+    })),
+    [
+      { type: "study", duration: 120, category: "knowledge" },
+      { type: "exercise", duration: 30, category: "body" },
+    ],
+  );
+});
+
+runTest("parser handles Chinese duration and activity keywords", () => {
+  const result = parseActivities("跑步30分钟，学习线性代数2小时，刷短视频1小时");
+
+  assert.equal(result.activities.length, 3);
+  assert.deepEqual(
+    result.activities.map((activity) => activity.duration),
+    [30, 120, 60],
+  );
+});
+
+runTest("growth scoring stays local and uses time, streak, and difficulty", () => {
+  const analysis = analyzeEntry("Today I studied linear algebra for 2 hours and ran 30 minutes", {
+    streakDays: 4,
+  });
+
+  assert.equal(analysis.activities.length, 2);
+  assert.equal(analysis.activities[0].difficulty, "hard");
+  assert.equal(analysis.activities[0].minutes, 120);
+  assert.ok(analysis.growth > 100);
+});
+
+runTest("manual correction can rescore edited structured activities", () => {
+  const analysis = analyzeParsedActivities(
+    [
+      {
+        id: "manual-1",
+        name: "Custom hard study",
+        sourceText: "Custom hard study",
+        type: "study",
+        duration: 90,
+        category: "knowledge",
+        displayCategory: "Knowledge",
+        baseXp: 40,
+        difficulty: "veryHard",
+        attributeWeights: { knowledge: 8, discipline: 2 },
+        ruleId: "manual-activity",
+        confidence: 1,
+      },
+    ],
+    { streakDays: 10 },
+  );
+
+  assert.equal(analysis.categories[0], "Knowledge");
+  assert.ok(analysis.growth > 80);
+});
+
+runTest("stats compute nonlinear level and today's growth", () => {
+  const entry = createEntry("Today I studied linear algebra for 2 hours", undefined, new Date());
+  const gameState = buildGameState([entry]);
+
+  assert.ok(gameState.todayGrowth > 0);
+  assert.equal(gameState.level, Math.floor(Math.sqrt(gameState.totalGrowth / 100)));
+});
+
+runTest("new accounts start with empty entries and zero stats", () => {
+  const entries = createEmptyEntries();
+  const gameState = buildGameState(entries);
+
+  assert.deepEqual(entries, []);
+  assert.equal(gameState.todayGrowth, 0);
+  assert.equal(gameState.totalGrowth, 0);
+  assert.equal(gameState.level, 0);
+  assert.equal(gameState.streak, 0);
+});
+
+runTest("language settings translate public beta UI and reports", () => {
+  const gameState = buildGameState([]);
+  const t = (key, params) => translate("zh", key, params);
+  const report = buildRuleBasedDailyReport(gameState, t);
+
+  assert.equal(t("nav.settings"), "设置");
+  assert.equal(t("settings.publicBeta"), "公开测试模式");
+  assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
+});
+
+console.log("All LifeQuest XP checks passed.");
