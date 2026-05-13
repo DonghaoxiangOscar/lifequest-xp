@@ -208,6 +208,16 @@ Netlify:
 
 Important: the public beta still stores accounts and activity logs in browser `localStorage`. Add backend auth and cloud storage before inviting users who need cross-device sync.
 
+GitHub Pages fallback:
+
+- The repository includes `.github/workflows/deploy-pages.yml`.
+- Pushing to `main` runs tests, builds the Vite app, and deploys `dist`.
+- The expected public URL is:
+
+```text
+https://donghaoxiangoscar.github.io/lifequest-xp/
+```
+
 ## Data Storage
 
 Accounts and entries are stored in browser localStorage. Each local account gets its own activity log.
