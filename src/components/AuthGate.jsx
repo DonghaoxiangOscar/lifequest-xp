@@ -2,7 +2,7 @@ import { LockKeyhole, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-export function AuthGate({ onLogin, onRegister }) {
+export function AuthGate({ authMode = "local", onLogin, onRegister }) {
   const { language, setLanguage, supportedLanguages, t } = useLanguage();
   const [mode, setMode] = useState("register");
   const [displayName, setDisplayName] = useState("");
@@ -11,6 +11,7 @@ export function AuthGate({ onLogin, onRegister }) {
   const [error, setError] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isRegistering = mode === "register";
+  const isCloudMode = authMode === "cloud";
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -41,7 +42,9 @@ export function AuthGate({ onLogin, onRegister }) {
           <h1 className="mt-3 font-display text-5xl font-black uppercase leading-none sm:text-6xl">
             {t("auth.title")}
           </h1>
-          <p className="mt-5 max-w-xl text-base font-semibold text-paper/80">{t("auth.intro")}</p>
+          <p className="mt-5 max-w-xl text-base font-semibold text-paper/80">
+            {isCloudMode ? t("auth.cloudIntro") : t("auth.intro")}
+          </p>
         </div>
 
         <form className="border-2 border-ink bg-paper p-5 shadow-hard sm:p-6" onSubmit={handleSubmit}>
@@ -112,7 +115,7 @@ export function AuthGate({ onLogin, onRegister }) {
             </label>
 
             <label className="grid gap-1 text-xs font-black uppercase text-ink/60">
-              {t("auth.passcode")}
+              {isCloudMode ? t("auth.password") : t("auth.passcode")}
               <input
                 className="border-2 border-ink bg-white px-3 py-3 text-base font-bold text-ink outline-none focus:ring-4 focus:ring-ink/15"
                 minLength="6"
@@ -127,7 +130,7 @@ export function AuthGate({ onLogin, onRegister }) {
           {error && <p className="mt-4 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ember">{error}</p>}
 
           <div className="mt-5 border-2 border-ink bg-white p-3 text-sm font-bold text-ink/70">
-            {t("auth.localWarning")}
+            {isCloudMode ? t("auth.cloudWarning") : t("auth.localWarning")}
           </div>
 
           <button
@@ -136,7 +139,13 @@ export function AuthGate({ onLogin, onRegister }) {
             type="submit"
           >
             {isRegistering ? <UserPlus size={18} /> : <LogIn size={18} />}
-            {isSubmitting ? t("auth.working") : isRegistering ? t("auth.createAccount") : t("auth.login")}
+            {isSubmitting
+              ? t("auth.working")
+              : isRegistering
+                ? isCloudMode
+                  ? t("auth.createCloudAccount")
+                  : t("auth.createAccount")
+                : t("auth.login")}
           </button>
         </form>
       </section>

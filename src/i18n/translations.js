@@ -25,6 +25,15 @@ export const translations = {
     app: {
       tagline: "Daily growth, captured before it fades.",
       publicBeta: "Public Beta",
+      loading: "Loading LifeQuest XP...",
+    },
+    sync: {
+      cloud: "Cloud",
+      error: "Sync error",
+      idle: "Ready",
+      local: "Local",
+      synced: "Synced",
+      syncing: "Syncing",
     },
     nav: {
       dashboard: "Dashboard",
@@ -47,11 +56,17 @@ export const translations = {
       login: "Login",
       displayName: "Display name",
       email: "Email",
+      password: "Password",
       passcode: "Local passcode",
+      cloudIntro:
+        "Create an account before recording activities. When Supabase is configured, your account and activity log can sync through your cloud database.",
       localWarning:
         "Local MVP only. The passcode is hashed in this browser, but this is not production-grade authentication. Do not reuse an important password here.",
+      cloudWarning:
+        "Cloud mode. Supabase Auth handles sign-in, and activity logs sync to your Supabase database. Scoring still runs locally in the browser.",
       working: "Working...",
       createAccount: "Create Local Account",
+      createCloudAccount: "Create Account",
     },
     dashboard: {
       mainQuest: "Main Quest",
@@ -176,11 +191,16 @@ export const translations = {
       locked: "Locked",
       accountStatus: "Account Status",
       localUser: "Local user",
+      cloudUser: "Cloud user",
       savedLogs: "Saved logs",
       storage: "Storage",
       thisBrowser: "This browser",
+      cloudStorage: "Supabase cloud",
+      syncStatus: "Sync status",
       localOnly:
         "This MVP account is local-only. A production website needs backend authentication and cloud storage for cross-device sync.",
+      cloudEnabled:
+        "This account is ready for cloud sync. Keep Supabase RLS enabled so each user can only read and write their own life logs.",
       statsSheet: "Stats Sheet",
       lifetimeCategories: "Lifetime Categories",
       decayedGrowth: "{value} decayed growth",
@@ -202,10 +222,13 @@ export const translations = {
     data: {
       backup: "Data Backup",
       backupCopy: "Data is local to this browser. Export a backup before clearing browser data or switching devices.",
+      backupCloudCopy:
+        "Data syncs through Supabase when cloud mode is configured. Export JSON before destructive testing or database changes.",
       exportJson: "Export JSON",
       importJson: "Import JSON",
       clearLocal: "Clear Local",
-      importConfirm: "Importing will replace the current local entries. Continue?",
+      clearEntries: "Clear Entries",
+      importConfirm: "Importing will replace the current entries. Continue?",
       importError: "Could not import this backup file.",
     },
     settings: {
@@ -216,9 +239,13 @@ export const translations = {
       publicBeta: "Public Beta Mode",
       publicBetaCopy:
         "This build is ready for a small public test: visitors can register locally, log activities, export data, and try the Growth system without a backend.",
+      publicBetaCloudCopy:
+        "This build now has a cloud-ready path: Supabase Auth can handle real accounts while parsing and Growth scoring stay local and cost-efficient.",
       statusReady: "Frontend ready",
       statusLocal: "Local account only",
+      statusCloudAuth: "Cloud auth active",
       statusCloudNeeded: "Cloud sync still needed",
+      statusCloudConfigured: "Cloud sync configured",
       statusAiBackend: "AI backend not connected",
       deploymentTitle: "Launch Checklist",
       deploymentCopy:
@@ -238,14 +265,23 @@ export const translations = {
       Waste: "Waste",
     },
     messages: {
-      loadDemoConfirm: "Load demo data? This replaces the current local entries for this account.",
-      clearConfirm: "Clear all local entries for this account? This cannot be undone.",
+      loadDemoConfirm: "Load demo data? This replaces the current entries for this account.",
+      clearConfirm: "Clear all entries for this account? This cannot be undone.",
     },
   },
   zh: {
     app: {
       tagline: "把每天的真实行动，记录成成长。",
       publicBeta: "公开测试版",
+      loading: "正在加载 LifeQuest XP...",
+    },
+    sync: {
+      cloud: "云端",
+      error: "同步错误",
+      idle: "就绪",
+      local: "本地",
+      synced: "已同步",
+      syncing: "同步中",
     },
     nav: {
       dashboard: "仪表盘",
@@ -268,11 +304,17 @@ export const translations = {
       login: "登录",
       displayName: "显示名称",
       email: "邮箱",
+      password: "密码",
       passcode: "本地密码",
+      cloudIntro:
+        "先创建账号再记录活动。配置 Supabase 后，你的账号和活动记录可以通过云端数据库同步。",
       localWarning:
         "当前只是本地 MVP。密码会在浏览器内哈希保存，但这还不是真正的生产级登录系统。不要在这里复用重要密码。",
+      cloudWarning:
+        "当前是云端模式。登录由 Supabase Auth 处理，活动记录会同步到你的 Supabase 数据库；成长计分仍然在浏览器本地完成。",
       working: "处理中...",
       createAccount: "创建本地账号",
+      createCloudAccount: "创建账号",
     },
     dashboard: {
       mainQuest: "今日主线",
@@ -394,10 +436,14 @@ export const translations = {
       locked: "未解锁",
       accountStatus: "账号状态",
       localUser: "本地用户",
+      cloudUser: "云端用户",
       savedLogs: "已保存记录",
       storage: "存储位置",
       thisBrowser: "当前浏览器",
+      cloudStorage: "Supabase 云端",
+      syncStatus: "同步状态",
       localOnly: "当前 MVP 账号只存在本地。真正上线的网站需要后端登录和云端数据库，才能跨设备同步。",
+      cloudEnabled: "这个账号已经具备云端同步路径。请保持 Supabase RLS 开启，让每个用户只能读写自己的生活记录。",
       statsSheet: "属性面板",
       lifetimeCategories: "累计类别",
       decayedGrowth: "{value} 衰减后成长",
@@ -419,10 +465,12 @@ export const translations = {
     data: {
       backup: "数据备份",
       backupCopy: "数据只保存在当前浏览器。清理浏览器数据或更换设备前，请先导出备份。",
+      backupCloudCopy: "配置云端模式后，数据会通过 Supabase 同步。进行破坏性测试或数据库调整前，建议先导出 JSON。",
       exportJson: "导出 JSON",
       importJson: "导入 JSON",
       clearLocal: "清空本地",
-      importConfirm: "导入会替换当前账号的本地记录。继续吗？",
+      clearEntries: "清空记录",
+      importConfirm: "导入会替换当前账号的记录。继续吗？",
       importError: "无法导入这个备份文件。",
     },
     settings: {
@@ -433,9 +481,13 @@ export const translations = {
       publicBeta: "公开测试模式",
       publicBetaCopy:
         "这个版本已经适合小范围公开测试：访客可以本地注册、记录活动、导出数据，并体验 Growth 系统，不需要后端也能试用。",
+      publicBetaCloudCopy:
+        "这个版本已经有云端化路径：Supabase Auth 可以处理真实账号，活动解析和 Growth 计分仍留在本地，控制成本。",
       statusReady: "前端已可构建",
       statusLocal: "当前仍是本地账号",
+      statusCloudAuth: "云端登录已启用",
       statusCloudNeeded: "仍需云端同步",
+      statusCloudConfigured: "云端同步已配置",
       statusAiBackend: "AI 后端尚未接入",
       deploymentTitle: "上线清单",
       deploymentCopy: "真正上线时，先把 Vite 构建部署到 Vercel 或 Netlify，再接 Supabase Auth 和云数据库。",
@@ -453,8 +505,8 @@ export const translations = {
       Waste: "消耗",
     },
     messages: {
-      loadDemoConfirm: "加载示例数据？这会替换当前账号的本地记录。",
-      clearConfirm: "清空当前账号的全部本地记录？这个操作不能撤销。",
+      loadDemoConfirm: "加载示例数据？这会替换当前账号的记录。",
+      clearConfirm: "清空当前账号的全部记录？这个操作不能撤销。",
     },
   },
 };

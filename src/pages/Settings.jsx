@@ -1,14 +1,24 @@
 import { Check, Cloud, Database, Globe2, Rocket, ShieldCheck, Sparkles } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { isSupabaseConfigured } from "../utils/supabaseClient.js";
 
-export function Settings() {
+export function Settings({ authMode = "local", syncStatus = "idle" }) {
   const { language, setLanguage, supportedLanguages, t } = useLanguage();
   const selectedLanguage = supportedLanguages.find((option) => option.id === language) ?? supportedLanguages[0];
+  const isCloudMode = authMode === "cloud";
 
   const betaStatuses = [
     { icon: Check, label: t("settings.statusReady"), tone: "bg-moss text-paper" },
-    { icon: ShieldCheck, label: t("settings.statusLocal"), tone: "bg-bolt text-ink" },
-    { icon: Cloud, label: t("settings.statusCloudNeeded"), tone: "bg-white text-ink" },
+    {
+      icon: ShieldCheck,
+      label: isCloudMode ? t("settings.statusCloudAuth") : t("settings.statusLocal"),
+      tone: isCloudMode ? "bg-moss text-paper" : "bg-bolt text-ink",
+    },
+    {
+      icon: Cloud,
+      label: isSupabaseConfigured ? t("settings.statusCloudConfigured") : t("settings.statusCloudNeeded"),
+      tone: isSupabaseConfigured ? "bg-moss text-paper" : "bg-white text-ink",
+    },
     { icon: Sparkles, label: t("settings.statusAiBackend"), tone: "bg-white text-ink" },
   ];
 
@@ -75,7 +85,9 @@ export function Settings() {
             <Rocket size={22} />
             <h3 className="font-display text-2xl font-black uppercase">{t("settings.publicBeta")}</h3>
           </div>
-          <p className="mt-2 text-sm font-semibold text-ink/70">{t("settings.publicBetaCopy")}</p>
+          <p className="mt-2 text-sm font-semibold text-ink/70">
+            {isCloudMode ? t("settings.publicBetaCloudCopy") : t("settings.publicBetaCopy")}
+          </p>
 
           <div className="mt-5 grid gap-3 sm:grid-cols-2">
             {betaStatuses.map((status) => {
@@ -89,6 +101,9 @@ export function Settings() {
               );
             })}
           </div>
+          <p className="mt-4 text-xs font-black uppercase text-ink/55">
+            {t("profile.syncStatus")}: {t(`sync.${syncStatus}`)}
+          </p>
         </div>
       </section>
 

@@ -1,6 +1,6 @@
 # LifeQuest XP
 
-LifeQuest XP is a local-first daily growth tracker built with React, Vite, Tailwind CSS, and browser localStorage. It turns normal daily activity text into structured activities, Growth scores, levels, streaks, and attribute stats.
+LifeQuest XP is a daily growth tracker built with React, Vite, Tailwind CSS, and a local-first product flow. It turns normal daily activity text into structured activities, Growth scores, levels, streaks, and attribute stats. It still works with browser localStorage, and it now has a Supabase-ready path for real accounts and cloud activity storage.
 
 ## Product Goals
 
@@ -16,12 +16,13 @@ LifeQuest XP is a local-first daily growth tracker built with React, Vite, Tailw
 - Vite
 - Tailwind CSS
 - localStorage
+- Optional Supabase Auth and Supabase Postgres cloud storage
 - lucide-react icons
 - Browser Web Speech API for voice input
 
 ## Core Screens
 
-- Account Gate: local registration/login before activity recording.
+- Account Gate: registration/login before activity recording.
 - Dashboard: today's activities, activity capture, Daily Growth, Total Growth, Level, streak multiplier, attributes, and daily summary.
 - Log Entry: full activity inbox using the same input system as Dashboard.
 - Daily Report: score, strengths, weaknesses, suggestions, category split, and today's log.
@@ -29,7 +30,9 @@ LifeQuest XP is a local-first daily growth tracker built with React, Vite, Tailw
 
 ## MVP Behavior
 
-- New local accounts start with empty entries and zero stats.
+- New accounts start with empty entries and zero stats.
+- Without Supabase environment variables, accounts and logs stay local in the browser.
+- With Supabase environment variables, accounts use Supabase Auth and logs sync to Supabase tables.
 - Sample data is never created automatically.
 - Use the Demo button only when you want to replace the current account's entries with sample logs.
 - Use Profile -> Data Backup -> Clear Local to reset an existing test account to zero.
@@ -57,9 +60,11 @@ docs/public-beta-launch.md
 src/
   components/       Reusable UI pieces
   data/             Activity rules and category metadata
-  hooks/            Browser APIs like speech recognition
+  hooks/            Auth, entries, local storage, and browser APIs
   pages/            Dashboard, Log Entry, Daily Report, Profile
   utils/            Parser, scoring, stats, AI integration design, reports
+supabase/
+  schema.sql        Production foundation tables, triggers, indexes, and RLS policies
 ```
 
 ## Input System
@@ -187,6 +192,29 @@ Build for production:
 npm run build
 ```
 
+## Enable Supabase Cloud Mode
+
+The app automatically stays in local mode until Supabase variables are present.
+
+1. Create a Supabase project.
+2. Open the Supabase SQL editor and run `supabase/schema.sql`.
+3. Copy the example env file:
+
+```bash
+cp .env.example .env.local
+```
+
+4. Fill in:
+
+```env
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your-public-anon-key
+```
+
+5. Restart the dev server.
+
+Important: only use the public anon key in this Vite app. Service-role keys and AI provider keys must stay on a backend.
+
 ## Deploy Public Beta
 
 This project is ready for a static public beta deploy.
@@ -206,7 +234,7 @@ Netlify:
 - Publish directory: `dist`.
 - `netlify.toml` is included for these defaults.
 
-Important: the public beta still stores accounts and activity logs in browser `localStorage`. Add backend auth and cloud storage before inviting users who need cross-device sync.
+Important: the public beta can run in local mode or Supabase cloud mode. For a broader launch, configure Supabase Auth, run the SQL schema, add privacy/legal pages, and test row-level security before inviting users who need cross-device sync.
 
 GitHub Pages fallback:
 
@@ -220,15 +248,17 @@ https://donghaoxiangoscar.github.io/lifequest-xp/
 
 ## Data Storage
 
-Accounts and entries are stored in browser localStorage. Each local account gets its own activity log.
+LifeQuest XP supports two storage modes:
+
+- Local mode: accounts and entries are stored in browser localStorage. Each local account gets its own activity log.
+- Cloud mode: Supabase Auth handles accounts, and entries sync to Supabase tables protected by row-level security.
 
 Important:
 
-- This is an MVP local account system.
-- The passcode is hashed before it is stored locally.
-- It is still not production-grade authentication.
-- Do not reuse an important password.
+- Local mode is still an MVP convenience system.
+- In local mode, the passcode is hashed before it is stored locally.
+- Do not reuse an important password in local mode.
 - New accounts start empty; demo data must be loaded manually.
-- Real production login should use a backend auth provider such as Supabase Auth, Firebase Auth, Auth.js, Clerk, or a custom backend.
+- Real production login should use Supabase Auth or another backend auth provider.
 
 Use the Demo button in the header to load sample data for the current account.

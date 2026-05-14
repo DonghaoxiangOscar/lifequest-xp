@@ -7,8 +7,8 @@ import { DailyReport } from "./pages/DailyReport.jsx";
 import { Profile } from "./pages/Profile.jsx";
 import { Settings } from "./pages/Settings.jsx";
 import { AppShell } from "./components/AppShell.jsx";
-import { useAccountEntries } from "./hooks/useAccountEntries.js";
-import { useLocalAuth } from "./hooks/useLocalAuth.js";
+import { useAuth } from "./hooks/useAuth.js";
+import { useEntries } from "./hooks/useEntries.js";
 import { useLanguage } from "./i18n/LanguageContext.jsx";
 import { createEmptyEntries } from "./utils/initialData.js";
 import { analyzeEntry, analyzeParsedActivities } from "./utils/scoring.js";
@@ -25,43 +25,56 @@ const pages = [
 
 export default function App() {
   const [activePage, setActivePage] = useState("dashboard");
-  const auth = useLocalAuth();
+  const auth = useAuth();
   const { t } = useLanguage();
-  const [entries, setEntries] = useAccountEntries(auth.currentAccount?.id, createEmptyEntries);
+  const entryStore = useEntries(auth.currentAccount, createEmptyEntries);
+  const entries = entryStore.entries;
 
   const gameState = useMemo(() => buildGameState(entries), [entries]);
 
-  if (!auth.currentAccount) {
-    return <AuthGate onLogin={auth.login} onRegister={auth.register} />;
-  }
-
-  function addEntry(text, parsedActivities) {
-    const analysis = parsedActivities
-      ? analyzeParsedActivities(parsedActivities, { streakDays: gameState.streak })
-      : analyzeEntry(text, { streakDays: gameState.streak });
-    setEntries((currentEntries) => [createEntry(text, analysis), ...currentEntries]);
-    setActivePage("dashboard");
-  }
-
-  function updateEntry(entryId, text, parsedActivities) {
-    setEntries((currentEntries) =>
-      currentEntries.map((entry) => {
-        if (entry.id !== entryId) return entry;
-
-        const analysis = parsedActivities
-          ? analyzeParsedActivities(parsedActivities, { streakDays: gameState.streak })
-          : analyzeEntry(text, { streakDays: gameState.streak });
-
-        return {
-          ...createEntry(text, analysis, new Date(entry.createdAt)),
-          id: entry.id,
-        };
-      }),
+  if (!auth.isAuthReady) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-paper px-4 text-ink">
+        <div className="border-2 border-ink bg-white px-5 py-4 font-black shadow-hard">{t("app.loading")}</div>
+      </main>
     );
   }
 
+  if (!auth.currentAccount) {
+    return <AuthGate authMode={auth.authMode} onLogin={auth.login} onRegister={auth.register} />;
+  }
+
+  if (!entryStore.isLoaded) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-paper px-4 text-ink">
+        <div className="border-2 border-ink bg-white px-5 py-4 font-black shadow-hard">{t("app.loading")}</div>
+      </main>
+    );
+  }
+
+  async function addEntry(text, parsedActivities) {
+    const analysis = parsedActivities
+      ? analyzeParsedActivities(parsedActivities, { streakDays: gameState.streak })
+      : analyzeEntry(text, { streakDays: gameState.streak });
+    await entryStore.addEntry(createEntry(text, analysis));
+    setActivePage("dashboard");
+  }
+
+  async function updateEntry(entryId, text, parsedActivities) {
+    await entryStore.updateEntry(entryId, (entry) => {
+      const analysis = parsedActivities
+        ? analyzeParsedActivities(parsedActivities, { streakDays: gameState.streak })
+        : analyzeEntry(text, { streakDays: gameState.streak });
+
+      return {
+        ...createEntry(text, analysis, new Date(entry.createdAt)),
+        id: entry.id,
+      };
+    });
+  }
+
   function deleteEntry(entryId) {
-    setEntries((currentEntries) => currentEntries.filter((entry) => entry.id !== entryId));
+    entryStore.deleteEntry(entryId);
   }
 
   function loadDemoData() {
@@ -70,13 +83,13 @@ export default function App() {
       if (!shouldReplace) return;
     }
 
-    setEntries(seedEntries());
+    entryStore.replaceEntries(seedEntries());
     setActivePage("dashboard");
   }
 
   function importEntries(importedEntries) {
     if (!Array.isArray(importedEntries)) return;
-    setEntries(importedEntries);
+    entryStore.replaceEntries(importedEntries);
     setActivePage("dashboard");
   }
 
@@ -86,7 +99,7 @@ export default function App() {
     const shouldClear = window.confirm(t("messages.clearConfirm"));
     if (!shouldClear) return;
 
-    setEntries(createEmptyEntries());
+    entryStore.clearEntries();
     setActivePage("dashboard");
   }
 
@@ -100,6 +113,11 @@ export default function App() {
     onClearEntries: clearEntries,
     onLoadDemoData: loadDemoData,
     currentAccount: auth.currentAccount,
+    authMode: auth.authMode,
+    isEntriesLoaded: entryStore.isLoaded,
+    storageLabel: entryStore.storageLabel,
+    syncError: entryStore.syncError,
+    syncStatus: entryStore.syncStatus,
   };
 
   return (
@@ -108,6 +126,9 @@ export default function App() {
       activePage={activePage}
       onNavigate={setActivePage}
       currentAccount={auth.currentAccount}
+      authMode={auth.authMode}
+      syncError={entryStore.syncError}
+      syncStatus={entryStore.syncStatus}
       onLogout={auth.logout}
       onLoadDemoData={loadDemoData}
     >
@@ -115,7 +136,7 @@ export default function App() {
       {activePage === "log" && <LogEntry {...pageProps} />}
       {activePage === "report" && <DailyReport {...pageProps} />}
       {activePage === "profile" && <Profile {...pageProps} />}
-      {activePage === "settings" && <Settings />}
+      {activePage === "settings" && <Settings authMode={auth.authMode} syncStatus={entryStore.syncStatus} />}
 
       <button
         className="fixed bottom-5 right-5 flex h-14 w-14 items-center justify-center border-2 border-ink bg-bolt text-ink shadow-hard transition hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-ink/20 md:hidden"

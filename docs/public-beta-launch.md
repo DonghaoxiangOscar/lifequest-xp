@@ -5,17 +5,19 @@ This document describes the first public-test version of LifeQuest XP.
 ## What This Version Can Do
 
 - Visitors can create a local account in the browser.
+- If Supabase environment variables are configured, visitors can use Supabase Auth accounts instead.
 - New accounts start with zero stats and empty activity logs.
 - Users can log activities with text, quick actions, or supported browser voice input.
 - The app parses activities locally and calculates Growth locally.
 - Users can switch display language in Settings.
 - Users can export, import, or clear local data from Profile.
 - The app can be built as a static Vite site.
+- Supabase schema and row-level security policies are included in `supabase/schema.sql`.
 
 ## Current Limitations
 
-- Accounts are local-only and do not sync across devices.
-- Activity data is stored in `localStorage`, not a cloud database.
+- Local mode accounts do not sync across devices.
+- Cloud sync requires creating a Supabase project, running the SQL schema, and setting deployment environment variables.
 - AI parser/report endpoints are only designed as placeholders.
 - Browser speech support depends on the user's browser.
 - There is no production privacy policy or delete-account backend yet.
@@ -37,14 +39,15 @@ dist
 ```
 
 5. Deploy with HTTPS.
-6. Invite only a small group of testers and explain that data is local to their browser.
+6. For local-mode testing, invite only a small group and explain that data is local to their browser.
+7. For cloud-mode testing, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, run `supabase/schema.sql`, and test RLS before inviting users.
 
 ## Next Production Upgrade
 
-For a real public website, add:
+For a real public website, finish:
 
-- Supabase Auth or another production auth provider.
-- Cloud tables for profiles, entries, parsed activities, settings, and daily reports.
-- Row-level access rules so users can only read and write their own data.
+- A Supabase project using the included schema.
+- Production env vars in Vercel or Netlify.
+- Email templates and auth redirect URLs.
 - Backend AI endpoints for low-confidence parsing and user-requested daily reports.
 - Privacy policy, terms, export data, and delete account flows.

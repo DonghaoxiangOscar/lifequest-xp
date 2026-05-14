@@ -6,6 +6,8 @@ import { createEmptyEntries } from "../src/utils/initialData.js";
 import { createEntry } from "../src/utils/storage.js";
 import { translate } from "../src/i18n/translations.js";
 import { buildRuleBasedDailyReport } from "../src/utils/report.js";
+import { activitiesToRows, entryToRow, rowToEntry } from "../src/utils/cloudEntries.js";
+import { isSupabaseConfigured } from "../src/utils/supabaseClient.js";
 
 function runTest(name, testFn) {
   try {
@@ -108,6 +110,24 @@ runTest("language settings translate public beta UI and reports", () => {
   assert.equal(t("nav.settings"), "设置");
   assert.equal(t("settings.publicBeta"), "公开测试模式");
   assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
+});
+
+runTest("cloud row helpers preserve local entry data shape", () => {
+  const entry = createEntry("Ran for 30 minutes", undefined, new Date("2026-05-14T08:00:00.000Z"));
+  const row = entryToRow(entry, "user-1");
+  const restoredEntry = rowToEntry(row);
+  const activityRows = activitiesToRows(entry, "user-1");
+
+  assert.equal(row.user_id, "user-1");
+  assert.equal(restoredEntry.id, entry.id);
+  assert.equal(restoredEntry.text, entry.text);
+  assert.equal(restoredEntry.growth, entry.growth);
+  assert.deepEqual(restoredEntry.categories, entry.categories);
+  assert.equal(activityRows[0].entry_id, entry.id);
+});
+
+runTest("Supabase stays optional for local development", () => {
+  assert.equal(typeof isSupabaseConfigured, "boolean");
 });
 
 console.log("All LifeQuest XP checks passed.");

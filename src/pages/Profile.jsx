@@ -5,8 +5,18 @@ import { StatCard } from "../components/StatCard.jsx";
 import { attributes, categoryMeta } from "../data/scoringRules.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-export function Profile({ entries, gameState, onImportEntries, onClearEntries, currentAccount }) {
+export function Profile({
+  entries,
+  gameState,
+  onImportEntries,
+  onClearEntries,
+  currentAccount,
+  authMode = "local",
+  syncError = "",
+  syncStatus = "idle",
+}) {
   const { t } = useLanguage();
+  const isCloudMode = authMode === "cloud";
 
   return (
     <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
@@ -59,7 +69,7 @@ export function Profile({ entries, gameState, onImportEntries, onClearEntries, c
           </div>
           <div className="mt-4 grid gap-2 text-sm font-bold">
             <div className="flex items-center justify-between border-2 border-ink bg-paper px-3 py-2">
-              <span>{t("profile.localUser")}</span>
+              <span>{isCloudMode ? t("profile.cloudUser") : t("profile.localUser")}</span>
               <span>{currentAccount?.displayName ?? "Unknown"}</span>
             </div>
             <div className="flex items-center justify-between border-2 border-ink bg-paper px-3 py-2">
@@ -71,14 +81,26 @@ export function Profile({ entries, gameState, onImportEntries, onClearEntries, c
                 <Database size={16} />
                 {t("profile.storage")}
               </span>
-              <span>{t("profile.thisBrowser")}</span>
+              <span>{isCloudMode ? t("profile.cloudStorage") : t("profile.thisBrowser")}</span>
+            </div>
+            <div className="flex items-center justify-between border-2 border-ink bg-paper px-3 py-2">
+              <span>{t("profile.syncStatus")}</span>
+              <span>{t(`sync.${syncStatus}`)}</span>
             </div>
           </div>
-          <p className="mt-3 text-sm font-semibold text-ink/65">{t("profile.localOnly")}</p>
+          {syncError && <p className="mt-3 text-sm font-bold text-ember">{syncError}</p>}
+          <p className="mt-3 text-sm font-semibold text-ink/65">
+            {isCloudMode ? t("profile.cloudEnabled") : t("profile.localOnly")}
+          </p>
         </div>
 
         <div className="mt-6">
-          <DataManager entries={entries} onImportEntries={onImportEntries} onClearEntries={onClearEntries} />
+          <DataManager
+            authMode={authMode}
+            entries={entries}
+            onImportEntries={onImportEntries}
+            onClearEntries={onClearEntries}
+          />
         </div>
       </section>
 

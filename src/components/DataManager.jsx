@@ -1,8 +1,9 @@
 import { Download, Trash2, Upload } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-export function DataManager({ entries, onImportEntries, onClearEntries }) {
+export function DataManager({ authMode = "local", entries, onImportEntries, onClearEntries }) {
   const { t } = useLanguage();
+  const isCloudMode = authMode === "cloud";
 
   function exportData() {
     const payload = {
@@ -51,7 +52,9 @@ export function DataManager({ entries, onImportEntries, onClearEntries }) {
   return (
     <section className="border-2 border-ink bg-paper p-5 shadow-hard">
       <h2 className="font-display text-2xl font-black uppercase">{t("data.backup")}</h2>
-      <p className="mt-2 text-sm font-semibold text-ink/70">{t("data.backupCopy")}</p>
+      <p className="mt-2 text-sm font-semibold text-ink/70">
+        {isCloudMode ? t("data.backupCloudCopy") : t("data.backupCopy")}
+      </p>
 
       <div className="mt-4 grid gap-2 sm:grid-cols-3">
         <button
@@ -76,7 +79,7 @@ export function DataManager({ entries, onImportEntries, onClearEntries }) {
           onClick={onClearEntries}
         >
           <Trash2 size={18} />
-          {t("data.clearLocal")}
+          {isCloudMode ? t("data.clearEntries") : t("data.clearLocal")}
         </button>
       </div>
     </section>

@@ -39,6 +39,9 @@ Current state:
 - localStorage.
 - Local registration/login gate.
 - Per-account local activity logs.
+- Optional Supabase Auth integration when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured.
+- Optional Supabase Postgres tables for profiles, entries, parsed activities, settings, and daily summaries.
+- Row-level security policies are included in `supabase/schema.sql`.
 - New local accounts start empty.
 - Demo data is loaded only when the user clicks the Demo action.
 - Passcode hashes are stored locally for MVP convenience.
@@ -46,13 +49,14 @@ Current state:
 
 Remaining production work:
 
-- Replace local auth with real backend authentication.
-- Add user accounts if cross-device sync is required.
-- Add cloud database only after the local product flow is stable.
+- Create a Supabase project and run `supabase/schema.sql`.
+- Add production Supabase environment variables in Vercel or Netlify.
+- Test sign-up, login, logout, import, delete, and cross-device sync with real test users.
+- Add a delete-account flow before a broader launch.
 
 Suggested auth options:
 
-- Supabase Auth for a small full-stack app.
+- Supabase Auth for a small full-stack app. This is now the built-in first path.
 - Firebase Auth if you want fast Google/Email login.
 - Clerk if you want a polished managed auth layer.
 - Custom backend only if you need full control.
@@ -102,6 +106,8 @@ Remaining production work:
 Current state:
 
 - App builds with Vite.
+- GitHub Pages can host the static public beta.
+- Vercel and Netlify can host the app with Supabase environment variables.
 
 Run:
 
@@ -119,4 +125,6 @@ Production notes:
 
 - Use HTTPS for microphone permissions.
 - Keep AI provider API keys on the backend.
+- Keep Supabase service-role keys out of the frontend.
+- Verify Supabase row-level security before inviting real users.
 - Add privacy copy before accepting real personal life logs from users.

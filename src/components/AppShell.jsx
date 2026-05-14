@@ -1,8 +1,20 @@
-import { LogOut, Sparkles, Swords } from "lucide-react";
+import { Cloud, HardDrive, LogOut, RefreshCw, Sparkles, Swords } from "lucide-react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-export function AppShell({ children, pages, activePage, currentAccount, onNavigate, onLogout, onLoadDemoData }) {
+export function AppShell({
+  children,
+  pages,
+  activePage,
+  currentAccount,
+  authMode = "local",
+  syncError = "",
+  syncStatus = "idle",
+  onNavigate,
+  onLogout,
+  onLoadDemoData,
+}) {
   const { t } = useLanguage();
+  const StorageIcon = authMode === "cloud" ? Cloud : HardDrive;
 
   return (
     <div className="min-h-screen text-ink">
@@ -27,8 +39,15 @@ export function AppShell({ children, pages, activePage, currentAccount, onNaviga
 
           <nav className="grid grid-cols-2 gap-2 sm:flex sm:flex-wrap sm:justify-end">
             {currentAccount && (
-              <div className="flex min-h-11 items-center justify-center border-2 border-ink bg-white px-3 py-2 text-sm font-black">
-                {currentAccount.displayName}
+              <div className="flex min-h-11 flex-col justify-center border-2 border-ink bg-white px-3 py-2 text-sm font-black leading-tight">
+                <span>{currentAccount.displayName}</span>
+                <span className="mt-1 flex items-center gap-1 text-[11px] uppercase text-ink/55">
+                  <StorageIcon size={13} />
+                  {authMode === "cloud" ? t("sync.cloud") : t("sync.local")}
+                  <RefreshCw size={12} className={syncStatus === "syncing" ? "animate-spin" : ""} />
+                  {t(`sync.${syncStatus}`)}
+                </span>
+                {syncError && <span className="mt-1 max-w-44 truncate text-[11px] text-ember">{syncError}</span>}
               </div>
             )}
 
