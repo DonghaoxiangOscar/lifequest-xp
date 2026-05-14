@@ -10,7 +10,8 @@ This document describes the first public-test version of LifeQuest XP.
 - Users can log activities with text, quick actions, or supported browser voice input.
 - The app parses activities locally and calculates Growth locally.
 - Users can switch display language in Settings.
-- Users can export, import, or clear local data from Profile.
+- Users can export, import, or clear app data from Profile and Settings.
+- Settings includes account status, sync status, a privacy note, beta terms, and an account deletion request template.
 - The app can be built as a static Vite site.
 - Supabase schema and row-level security policies are included in `supabase/schema.sql`.
 
@@ -20,7 +21,8 @@ This document describes the first public-test version of LifeQuest XP.
 - Cloud sync requires creating a Supabase project, running the SQL schema, and setting deployment environment variables.
 - AI parser/report endpoints are only designed as placeholders.
 - Browser speech support depends on the user's browser.
-- There is no production privacy policy or delete-account backend yet.
+- The app includes beta privacy and terms copy, but production legal review is still needed.
+- Full Supabase Auth account deletion still needs a secure backend or admin action; the frontend must not contain a service-role key.
 
 ## Recommended First Deployment
 
@@ -51,4 +53,5 @@ For a real public website, finish:
 - Production env vars in Vercel or Netlify.
 - Email templates and auth redirect URLs.
 - Backend AI endpoints for low-confidence parsing and user-requested daily reports.
-- Privacy policy, terms, export data, and delete account flows.
+- Production-reviewed privacy policy and terms.
+- A backend delete-account endpoint or Supabase Edge Function using service-role credentials safely on the server side.

@@ -46,6 +46,8 @@ Current state:
 - Demo data is loaded only when the user clicks the Demo action.
 - Passcode hashes are stored locally for MVP convenience.
 - JSON export and import backup.
+- Settings now includes account status, sync status, backup/import controls, safe data clearing, beta privacy copy, and beta terms.
+- Cloud data clearing deletes LifeQuest activity entries and daily summaries under the signed-in user's RLS scope.
 
 Remaining production work:
 
@@ -53,7 +55,7 @@ Remaining production work:
 - Add production Supabase environment variables in Vercel or Netlify.
 - For GitHub Pages, add `VITE_SUPABASE_URL` as a repository variable and `VITE_SUPABASE_ANON_KEY` as a repository secret.
 - Test sign-up, login, logout, import, delete, and cross-device sync with real test users.
-- Add a delete-account flow before a broader launch.
+- Add a secure backend or Edge Function for full Supabase Auth account deletion before a broader launch.
 
 Suggested auth options:
 
@@ -127,5 +129,6 @@ Production notes:
 - Use HTTPS for microphone permissions.
 - Keep AI provider API keys on the backend.
 - Keep Supabase service-role keys out of the frontend.
+- Use service-role credentials only in a trusted backend when implementing full account deletion.
 - Verify Supabase row-level security before inviting real users.
-- Add privacy copy before accepting real personal life logs from users.
+- Replace beta privacy/terms copy with production-reviewed legal text before a broad launch.

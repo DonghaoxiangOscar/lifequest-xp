@@ -252,9 +252,37 @@ export const translations = {
         "For a real website, deploy the Vite build to Vercel or Netlify, then add Supabase Auth and a cloud database before inviting real users.",
       currentLanguage: "Current language",
       savedLocally: "Saved locally",
+      accountTitle: "Account Center",
+      accountCopy: "Manage the signed-in account, data controls, and beta safety notes from one place.",
+      accountName: "Account name",
+      accountEmail: "Email",
+      unknownEmail: "Unknown email",
       privacyTitle: "Privacy Note",
       privacyCopy:
         "Life logs are sensitive. Before a broad public launch, add a privacy policy, delete-account flow, and backend access rules.",
+      dangerTitle: "Danger Zone",
+      dangerCopy:
+        "Clearing app data removes your LifeQuest activity records. Export JSON first if you may need a backup.",
+      clearData: "Clear LifeQuest Data",
+      copyDeletionRequest: "Copy Account Deletion Request",
+      deletionRequestCopied: "Deletion request copied. Send it to the project owner or support channel.",
+      deletionRequestTemplate:
+        "Please delete my LifeQuest XP account and all related Supabase Auth data. Account email: {email}. I understand my LifeQuest activity data should be cleared first from the app.",
+      deleteAccountBackendNote:
+        "Supabase Auth account deletion needs a secure backend or admin action. The frontend can clear app records, but it must not contain a service-role key.",
+      privacyPolicyTitle: "Privacy Policy",
+      privacyPolicy1:
+        "LifeQuest XP stores activity logs, parsed activity items, growth scores, and basic account profile data so the app can sync your progress.",
+      privacyPolicy2:
+        "Scoring and simple parsing run in the browser. AI is not called for normal activity logging in this beta.",
+      privacyPolicy3:
+        "You can export your records and clear app data. Full Auth account deletion requires a secure backend or project-owner action.",
+      termsTitle: "Beta Terms",
+      terms1: "LifeQuest XP is a beta self-tracking tool, not medical, financial, or professional advice.",
+      terms2:
+        "Scores are motivational estimates. They should help reflection, not judge your worth or replace real-world support.",
+      terms3:
+        "During beta, features and data structures may change. Export a backup before destructive tests or major changes.",
     },
     categories: {
       Body: "Body",
@@ -493,8 +521,31 @@ export const translations = {
       deploymentCopy: "真正上线时，先把 Vite 构建部署到 Vercel 或 Netlify，再接 Supabase Auth 和云数据库。",
       currentLanguage: "当前语言",
       savedLocally: "已保存在本地",
+      accountTitle: "账号中心",
+      accountCopy: "在这里管理当前账号、数据操作和公开测试阶段的安全说明。",
+      accountName: "账号名称",
+      accountEmail: "邮箱",
+      unknownEmail: "未知邮箱",
       privacyTitle: "隐私提示",
       privacyCopy: "生活记录属于敏感数据。大范围公开前，需要补隐私政策、删除账号流程和后端权限规则。",
+      dangerTitle: "危险操作",
+      dangerCopy: "清空数据会删除你的 LifeQuest 活动记录。如果未来还可能需要，请先导出 JSON 备份。",
+      clearData: "清空 LifeQuest 数据",
+      copyDeletionRequest: "复制删除账号申请",
+      deletionRequestCopied: "删除账号申请已复制。请发送给项目所有者或支持渠道。",
+      deletionRequestTemplate:
+        "请删除我的 LifeQuest XP 账号以及相关 Supabase Auth 数据。账号邮箱：{email}。我理解应先在应用内清空 LifeQuest 活动数据。",
+      deleteAccountBackendNote:
+        "删除 Supabase Auth 账号需要安全后端或管理员操作。前端可以清空应用记录，但不能放入 service-role 高权限密钥。",
+      privacyPolicyTitle: "隐私政策",
+      privacyPolicy1:
+        "LifeQuest XP 会保存活动记录、解析后的活动项、成长分数和基础账号资料，用于同步你的成长进度。",
+      privacyPolicy2: "普通活动记录的解析和计分在浏览器内完成。当前 Beta 不会为普通记录调用 AI。",
+      privacyPolicy3: "你可以导出记录并清空应用数据。完整删除 Auth 账号需要安全后端或项目所有者处理。",
+      termsTitle: "Beta 条款",
+      terms1: "LifeQuest XP 是公开测试阶段的自我记录工具，不构成医疗、财务或专业建议。",
+      terms2: "分数只是用于激励和复盘的估算，不应该用来评判你的价值，也不能替代现实支持。",
+      terms3: "Beta 阶段功能和数据结构可能变化。进行破坏性测试或重大调整前，请先导出备份。",
     },
     categories: {
       Body: "身体",

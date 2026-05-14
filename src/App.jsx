@@ -100,13 +100,13 @@ export default function App() {
     setActivePage("dashboard");
   }
 
-  function clearEntries() {
+  async function clearEntries() {
     if (entries.length === 0) return;
 
     const shouldClear = window.confirm(t("messages.clearConfirm"));
     if (!shouldClear) return;
 
-    entryStore.clearEntries();
+    await entryStore.clearEntries();
     setActivePage("dashboard");
   }
 
@@ -143,7 +143,7 @@ export default function App() {
       {activePage === "log" && <LogEntry {...pageProps} />}
       {activePage === "report" && <DailyReport {...pageProps} />}
       {activePage === "profile" && <Profile {...pageProps} />}
-      {activePage === "settings" && <Settings authMode={auth.authMode} syncStatus={entryStore.syncStatus} />}
+      {activePage === "settings" && <Settings {...pageProps} onLogout={auth.logout} />}
 
       <button
         className="fixed bottom-5 right-5 flex h-14 w-14 items-center justify-center border-2 border-ink bg-bolt text-ink shadow-hard transition hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-ink/20 md:hidden"

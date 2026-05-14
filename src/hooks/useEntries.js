@@ -97,6 +97,7 @@ export function useEntries(account, initialEntries) {
       if (!isCloud || !accountId) return;
 
       setSyncStatus("syncing");
+      setSyncError("");
 
       const { error } = await supabase.from("activity_entries").upsert(entryToRow(entry, accountId));
       if (error) throw error;
@@ -109,6 +110,7 @@ export function useEntries(account, initialEntries) {
       }
 
       setSyncStatus("synced");
+      setSyncError("");
     },
     [accountId, isCloud],
   );
@@ -159,9 +161,11 @@ export function useEntries(account, initialEntries) {
 
       try {
         setSyncStatus("syncing");
+        setSyncError("");
         const { error } = await supabase.from("activity_entries").delete().eq("id", entryId);
         if (error) throw error;
         setSyncStatus("synced");
+        setSyncError("");
       } catch (error) {
         setSyncStatus("error");
         setSyncError(error.message);
@@ -179,6 +183,10 @@ export function useEntries(account, initialEntries) {
 
       try {
         setSyncStatus("syncing");
+        setSyncError("");
+        const { error: summaryDeleteError } = await supabase.from("daily_summaries").delete().eq("user_id", accountId);
+        if (summaryDeleteError) throw summaryDeleteError;
+
         const { error: deleteError } = await supabase.from("activity_entries").delete().eq("user_id", accountId);
         if (deleteError) throw deleteError;
 
@@ -196,6 +204,7 @@ export function useEntries(account, initialEntries) {
         }
 
         setSyncStatus("synced");
+        setSyncError("");
       } catch (error) {
         setSyncStatus("error");
         setSyncError(error.message);

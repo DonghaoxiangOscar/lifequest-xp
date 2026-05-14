@@ -110,6 +110,8 @@ runTest("language settings translate public beta UI and reports", () => {
 
   assert.equal(t("nav.settings"), "设置");
   assert.equal(t("settings.publicBeta"), "公开测试模式");
+  assert.equal(t("settings.accountTitle"), "账号中心");
+  assert.equal(t("settings.termsTitle"), "Beta 条款");
   assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
 });
 

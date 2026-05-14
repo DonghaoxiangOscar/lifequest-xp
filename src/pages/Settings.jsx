@@ -1,11 +1,37 @@
-import { Check, Cloud, Database, Globe2, Rocket, ShieldCheck, Sparkles } from "lucide-react";
+import {
+  AlertTriangle,
+  Check,
+  Clipboard,
+  Cloud,
+  Database,
+  Globe2,
+  LogOut,
+  Rocket,
+  ShieldCheck,
+  Sparkles,
+  Trash2,
+  UserRound,
+} from "lucide-react";
+import { useState } from "react";
+import { DataManager } from "../components/DataManager.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { isSupabaseConfigured } from "../utils/supabaseClient.js";
 
-export function Settings({ authMode = "local", syncStatus = "idle" }) {
+export function Settings({
+  authMode = "local",
+  currentAccount,
+  entries = [],
+  onClearEntries,
+  onImportEntries,
+  onLogout,
+  syncError = "",
+  syncStatus = "idle",
+}) {
   const { language, setLanguage, supportedLanguages, t } = useLanguage();
+  const [notice, setNotice] = useState("");
   const selectedLanguage = supportedLanguages.find((option) => option.id === language) ?? supportedLanguages[0];
   const isCloudMode = authMode === "cloud";
+  const accountEmail = currentAccount?.email ?? t("settings.unknownEmail");
 
   const betaStatuses = [
     { icon: Check, label: t("settings.statusReady"), tone: "bg-moss text-paper" },
@@ -22,6 +48,17 @@ export function Settings({ authMode = "local", syncStatus = "idle" }) {
     { icon: Sparkles, label: t("settings.statusAiBackend"), tone: "bg-white text-ink" },
   ];
 
+  async function copyDeletionRequest() {
+    const requestText = t("settings.deletionRequestTemplate", { email: accountEmail });
+
+    try {
+      await navigator.clipboard.writeText(requestText);
+      setNotice(t("settings.deletionRequestCopied"));
+    } catch {
+      setNotice(requestText);
+    }
+  }
+
   return (
     <div className="space-y-6">
       <section className="border-2 border-ink bg-ink p-5 text-paper shadow-hard sm:p-6">
@@ -37,6 +74,53 @@ export function Settings({ authMode = "local", syncStatus = "idle" }) {
             <span className="font-display text-2xl font-black">{selectedLanguage.nativeLabel}</span>
           </div>
         </div>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-[0.9fr_1.1fr]">
+        <div className="border-2 border-ink bg-paper p-5 shadow-hard sm:p-6">
+          <div className="flex items-center gap-2">
+            <UserRound size={22} />
+            <h3 className="font-display text-2xl font-black uppercase">{t("settings.accountTitle")}</h3>
+          </div>
+          <p className="mt-2 text-sm font-semibold text-ink/70">{t("settings.accountCopy")}</p>
+
+          <div className="mt-5 grid gap-2 text-sm font-bold">
+            <div className="flex items-center justify-between gap-3 border-2 border-ink bg-white px-3 py-2">
+              <span>{t("settings.accountName")}</span>
+              <span className="text-right">{currentAccount?.displayName ?? "Player"}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-2 border-ink bg-white px-3 py-2">
+              <span>{t("settings.accountEmail")}</span>
+              <span className="max-w-64 truncate text-right">{accountEmail}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-2 border-ink bg-white px-3 py-2">
+              <span>{t("profile.syncStatus")}</span>
+              <span>{t(`sync.${syncStatus}`)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-3 border-2 border-ink bg-white px-3 py-2">
+              <span>{t("profile.savedLogs")}</span>
+              <span>{entries.length}</span>
+            </div>
+          </div>
+
+          {syncError && <p className="mt-3 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ember">{syncError}</p>}
+
+          <button
+            className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-white px-3 py-2 font-black transition hover:-translate-y-0.5 hover:bg-bolt focus:outline-none focus:ring-4 focus:ring-ink/20"
+            type="button"
+            onClick={onLogout}
+          >
+            <LogOut size={18} />
+            {t("nav.logout")}
+          </button>
+        </div>
+
+        <DataManager
+          authMode={authMode}
+          entries={entries}
+          onClearEntries={onClearEntries}
+          onImportEntries={onImportEntries}
+        />
       </section>
 
       <section className="grid gap-4 lg:grid-cols-[0.95fr_1.05fr]">
@@ -122,6 +206,64 @@ export function Settings({ authMode = "local", syncStatus = "idle" }) {
             <h3 className="font-display text-2xl font-black uppercase">{t("settings.privacyTitle")}</h3>
           </div>
           <p className="mt-3 text-sm font-semibold text-ink/70">{t("settings.privacyCopy")}</p>
+        </div>
+      </section>
+
+      <section className="border-2 border-ink bg-paper p-5 shadow-hard sm:p-6">
+        <div className="flex items-center gap-2">
+          <AlertTriangle size={22} />
+          <h3 className="font-display text-2xl font-black uppercase">{t("settings.dangerTitle")}</h3>
+        </div>
+        <p className="mt-2 text-sm font-semibold text-ink/70">{t("settings.dangerCopy")}</p>
+
+        <div className="mt-5 grid gap-3 lg:grid-cols-2">
+          <button
+            className="flex min-h-12 items-center justify-center gap-2 border-2 border-ink bg-white px-4 py-3 font-black transition hover:-translate-y-0.5 hover:bg-ember hover:text-paper focus:outline-none focus:ring-4 focus:ring-ink/20 disabled:cursor-not-allowed disabled:bg-ink/10 disabled:text-ink/40"
+            type="button"
+            disabled={entries.length === 0}
+            onClick={onClearEntries}
+          >
+            <Trash2 size={18} />
+            {t("settings.clearData")}
+          </button>
+
+          <button
+            className="flex min-h-12 items-center justify-center gap-2 border-2 border-ink bg-bolt px-4 py-3 font-black text-ink transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-ink/20"
+            type="button"
+            onClick={copyDeletionRequest}
+          >
+            <Clipboard size={18} />
+            {t("settings.copyDeletionRequest")}
+          </button>
+        </div>
+
+        {notice && <p className="mt-3 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ink/70">{notice}</p>}
+        <p className="mt-3 text-xs font-bold text-ink/55">{t("settings.deleteAccountBackendNote")}</p>
+      </section>
+
+      <section className="grid gap-4 lg:grid-cols-2">
+        <div className="border-2 border-ink bg-white p-5 shadow-hard">
+          <div className="flex items-center gap-2">
+            <ShieldCheck size={22} />
+            <h3 className="font-display text-2xl font-black uppercase">{t("settings.privacyPolicyTitle")}</h3>
+          </div>
+          <div className="mt-4 space-y-3 text-sm font-semibold text-ink/75">
+            <p>{t("settings.privacyPolicy1")}</p>
+            <p>{t("settings.privacyPolicy2")}</p>
+            <p>{t("settings.privacyPolicy3")}</p>
+          </div>
+        </div>
+
+        <div className="border-2 border-ink bg-white p-5 shadow-hard">
+          <div className="flex items-center gap-2">
+            <Clipboard size={22} />
+            <h3 className="font-display text-2xl font-black uppercase">{t("settings.termsTitle")}</h3>
+          </div>
+          <div className="mt-4 space-y-3 text-sm font-semibold text-ink/75">
+            <p>{t("settings.terms1")}</p>
+            <p>{t("settings.terms2")}</p>
+            <p>{t("settings.terms3")}</p>
+          </div>
         </div>
       </section>
     </div>

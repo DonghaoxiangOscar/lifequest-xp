@@ -46,7 +46,7 @@ The app now includes a top-level Settings page for public-test readiness:
 - Display language can be switched between English and Chinese.
 - The selected language is saved in `localStorage`.
 - Core product surfaces use the selected language: navigation, auth gate, Dashboard, input composer, reports, profile, data backup, and settings.
-- The Settings page shows the current public beta status and the remaining production steps.
+- The Settings page shows account status, sync status, backup/import controls, privacy notes, beta terms, and safe data deletion.
 
 See also:
 
@@ -265,5 +265,8 @@ Important:
 - Do not reuse an important password in local mode.
 - New accounts start empty; demo data must be loaded manually.
 - Real production login should use Supabase Auth or another backend auth provider.
+- Users can export their LifeQuest records and clear app data from Settings or Profile.
+- Clearing app data removes LifeQuest activity records and generated summaries, but deleting the Supabase Auth user itself requires a secure backend or admin action.
+- Never put a Supabase service-role key in this frontend app.
 
 Use the Demo button in the header to load sample data for the current account.
