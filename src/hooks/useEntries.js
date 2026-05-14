@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { activitiesToRows, entryToRow, rowToEntry } from "../utils/cloudEntries.js";
+import { withTimeout } from "../utils/asyncTimeout.js";
 import { supabase } from "../utils/supabaseClient.js";
 
 function getStorageKey(accountId) {
@@ -39,20 +40,27 @@ export function useEntries(account, initialEntries) {
       if (isCloud) {
         setSyncStatus("syncing");
 
-        const { data, error } = await supabase
-          .from("activity_entries")
-          .select("*")
-          .order("created_at", { ascending: false });
+        try {
+          const { data, error } = await withTimeout(
+            supabase.from("activity_entries").select("*").order("created_at", { ascending: false }),
+            "Activity sync took too long. Please refresh or try again later.",
+          );
 
-        if (!isMounted) return;
+          if (!isMounted) return;
 
-        if (error) {
+          if (error) {
+            setEntries([]);
+            setSyncStatus("error");
+            setSyncError(error.message);
+          } else {
+            setEntries((data ?? []).map(rowToEntry));
+            setSyncStatus("synced");
+          }
+        } catch (error) {
+          if (!isMounted) return;
           setEntries([]);
           setSyncStatus("error");
           setSyncError(error.message);
-        } else {
-          setEntries((data ?? []).map(rowToEntry));
-          setSyncStatus("synced");
         }
 
         setLoadedKey(null);

@@ -41,7 +41,14 @@ export default function App() {
   }
 
   if (!auth.currentAccount) {
-    return <AuthGate authMode={auth.authMode} onLogin={auth.login} onRegister={auth.register} />;
+    return (
+      <AuthGate
+        authMode={auth.authMode}
+        startupError={auth.authError}
+        onLogin={auth.login}
+        onRegister={auth.register}
+      />
+    );
   }
 
   if (!entryStore.isLoaded) {

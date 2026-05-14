@@ -1,4 +1,5 @@
 import { supabase } from "./supabaseClient.js";
+import { withTimeout } from "./asyncTimeout.js";
 
 const viteEnv = import.meta.env ?? {};
 const appBasePath = viteEnv.BASE_URL ?? "/";
@@ -27,28 +28,35 @@ function toCloudAccount(user, profile = null) {
 export async function fetchCloudAccount(sessionUser) {
   if (!supabase || !sessionUser) return null;
 
-  const { data: profile } = await supabase
-    .from("profiles")
-    .select("display_name,email")
-    .eq("id", sessionUser.id)
-    .maybeSingle();
+  const { data: profile, error } = await withTimeout(
+    supabase.from("profiles").select("display_name,email").eq("id", sessionUser.id).maybeSingle(),
+    "Profile loading took too long. Please refresh or try logging in again.",
+  );
+
+  if (error) {
+    // The account can still work from Supabase Auth metadata even if the profile row is delayed.
+    console.warn("Could not load Supabase profile", error);
+  }
 
   return toCloudAccount(sessionUser, profile);
 }
 
 export async function registerCloudAccount({ displayName, email, passcode }) {
-  const { data, error } = await supabase.auth.signUp({
-    email: email.trim().toLowerCase(),
-    password: passcode,
-    options: {
-      // Force email confirmation links back to the current app base path.
-      // This prevents GitHub Pages redirects from losing the /lifequest-xp/ prefix.
-      emailRedirectTo: getAuthRedirectUrl(),
-      data: {
-        display_name: displayName.trim(),
+  const { data, error } = await withTimeout(
+    supabase.auth.signUp({
+      email: email.trim().toLowerCase(),
+      password: passcode,
+      options: {
+        // Force email confirmation links back to the current app base path.
+        // This prevents GitHub Pages redirects from losing the /lifequest-xp/ prefix.
+        emailRedirectTo: getAuthRedirectUrl(),
+        data: {
+          display_name: displayName.trim(),
+        },
       },
-    },
-  });
+    }),
+    "Registration took too long. Please check your connection and try again.",
+  );
 
   if (error) throw new Error(error.message);
   if (!data.session) {
@@ -59,10 +67,13 @@ export async function registerCloudAccount({ displayName, email, passcode }) {
 }
 
 export async function loginCloudAccount({ email, passcode }) {
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email.trim().toLowerCase(),
-    password: passcode,
-  });
+  const { data, error } = await withTimeout(
+    supabase.auth.signInWithPassword({
+      email: email.trim().toLowerCase(),
+      password: passcode,
+    }),
+    "Login took too long. Please check your connection and try again.",
+  );
 
   if (error) throw new Error(error.message);
   return fetchCloudAccount(data.user);

@@ -2,7 +2,7 @@ import { LockKeyhole, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 
-export function AuthGate({ authMode = "local", onLogin, onRegister }) {
+export function AuthGate({ authMode = "local", startupError = "", onLogin, onRegister }) {
   const { language, setLanguage, supportedLanguages, t } = useLanguage();
   const [mode, setMode] = useState("register");
   const [displayName, setDisplayName] = useState("");
@@ -12,6 +12,7 @@ export function AuthGate({ authMode = "local", onLogin, onRegister }) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isRegistering = mode === "register";
   const isCloudMode = authMode === "cloud";
+  const visibleError = error || startupError;
 
   async function handleSubmit(event) {
     event.preventDefault();
@@ -127,7 +128,11 @@ export function AuthGate({ authMode = "local", onLogin, onRegister }) {
             </label>
           </div>
 
-          {error && <p className="mt-4 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ember">{error}</p>}
+          {visibleError && (
+            <p className="mt-4 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ember">
+              {visibleError}
+            </p>
+          )}
 
           <div className="mt-5 border-2 border-ink bg-white p-3 text-sm font-bold text-ink/70">
             {isCloudMode ? t("auth.cloudWarning") : t("auth.localWarning")}
