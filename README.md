@@ -215,6 +215,11 @@ VITE_SUPABASE_ANON_KEY=your-public-anon-key
 
 Important: only use the public anon key in this Vite app. Service-role keys and AI provider keys must stay on a backend.
 
+For GitHub Pages, the workflow already reads these optional deployment settings:
+
+- Repository variable: `VITE_SUPABASE_URL`
+- Repository secret: `VITE_SUPABASE_ANON_KEY`
+
 ## Deploy Public Beta
 
 This project is ready for a static public beta deploy.

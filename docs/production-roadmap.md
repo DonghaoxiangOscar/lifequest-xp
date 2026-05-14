@@ -51,6 +51,7 @@ Remaining production work:
 
 - Create a Supabase project and run `supabase/schema.sql`.
 - Add production Supabase environment variables in Vercel or Netlify.
+- For GitHub Pages, add `VITE_SUPABASE_URL` as a repository variable and `VITE_SUPABASE_ANON_KEY` as a repository secret.
 - Test sign-up, login, logout, import, delete, and cross-device sync with real test users.
 - Add a delete-account flow before a broader launch.
 

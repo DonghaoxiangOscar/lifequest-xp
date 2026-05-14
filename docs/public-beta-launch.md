@@ -40,7 +40,8 @@ dist
 
 5. Deploy with HTTPS.
 6. For local-mode testing, invite only a small group and explain that data is local to their browser.
-7. For cloud-mode testing, add `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY`, run `supabase/schema.sql`, and test RLS before inviting users.
+7. For cloud-mode testing, run `supabase/schema.sql`, then add `VITE_SUPABASE_URL` as a GitHub repository variable and `VITE_SUPABASE_ANON_KEY` as a GitHub repository secret.
+8. Test RLS before inviting users.
 
 ## Next Production Upgrade
 
