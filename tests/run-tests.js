@@ -8,6 +8,7 @@ import { translate } from "../src/i18n/translations.js";
 import { buildRuleBasedDailyReport } from "../src/utils/report.js";
 import { activitiesToRows, entryToRow, rowToEntry } from "../src/utils/cloudEntries.js";
 import { isSupabaseConfigured } from "../src/utils/supabaseClient.js";
+import { buildAuthRedirectUrl } from "../src/utils/cloudAuth.js";
 
 function runTest(name, testFn) {
   try {
@@ -38,7 +39,7 @@ runTest("parser converts natural language into structured activities", () => {
 });
 
 runTest("parser handles Chinese duration and activity keywords", () => {
-  const result = parseActivities("跑步30分钟，学习线性代数2小时，刷短视频1小时");
+  const result = parseActivities("??30??,??????2??,????1??");
 
   assert.equal(result.activities.length, 3);
   assert.deepEqual(
@@ -107,9 +108,9 @@ runTest("language settings translate public beta UI and reports", () => {
   const t = (key, params) => translate("zh", key, params);
   const report = buildRuleBasedDailyReport(gameState, t);
 
-  assert.equal(t("nav.settings"), "设置");
-  assert.equal(t("settings.publicBeta"), "公开测试模式");
-  assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
+  assert.equal(t("nav.settings"), "??");
+  assert.equal(t("settings.publicBeta"), "??????");
+  assert.equal(report.suggestions[0], "????????,?????????");
 });
 
 runTest("cloud row helpers preserve local entry data shape", () => {
@@ -128,6 +129,13 @@ runTest("cloud row helpers preserve local entry data shape", () => {
 
 runTest("Supabase stays optional for local development", () => {
   assert.equal(typeof isSupabaseConfigured, "boolean");
+});
+
+runTest("email confirmation redirects keep the GitHub Pages base path", () => {
+  assert.equal(
+    buildAuthRedirectUrl("https://donghaoxiangoscar.github.io", "/lifequest-xp/"),
+    "https://donghaoxiangoscar.github.io/lifequest-xp/",
+  );
 });
 
 console.log("All LifeQuest XP checks passed.");
