@@ -10,6 +10,7 @@ import { activitiesToRows, entryToRow, rowToEntry } from "../src/utils/cloudEntr
 import { isSupabaseConfigured } from "../src/utils/supabaseClient.js";
 import { buildAuthRedirectUrl } from "../src/utils/cloudAuth.js";
 import { getOnboardingStorageKey } from "../src/hooks/useOnboarding.js";
+import { getFriendlyAuthError } from "../src/utils/authMessages.js";
 
 function runTest(name, testFn) {
   try {
@@ -116,6 +117,7 @@ runTest("language settings translate public beta UI and reports", () => {
   assert.equal(t("settings.termsTitle"), "Beta 条款");
   assert.equal(t("sync.retry"), "重试同步");
   assert.notEqual(t("onboarding.title"), "onboarding.title");
+  assert.notEqual(t("launch.title"), "launch.title");
   assert.equal(en("settings.feedbackTitle"), "Beta Feedback");
   assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
 });
@@ -148,6 +150,20 @@ runTest("email confirmation redirects keep the GitHub Pages base path", () => {
 runTest("onboarding state is scoped per signed-in account", () => {
   assert.equal(getOnboardingStorageKey("user-123"), "lifequest-xp.onboarding.v1.user-123");
   assert.equal(getOnboardingStorageKey(""), null);
+});
+
+runTest("auth errors are converted into user-friendly beta messages", () => {
+  const t = (key, params) => translate("en", key, params);
+
+  assert.equal(
+    getFriendlyAuthError("email rate limit exceeded", t),
+    "Supabase email rate limit exceeded. Wait before requesting another email, or configure custom SMTP for public testing.",
+  );
+  assert.equal(getFriendlyAuthError("Invalid login credentials", t), "Email or password is incorrect.");
+  assert.equal(
+    getFriendlyAuthError("Invalid path specified in request URL", t),
+    "Supabase URL looks wrong. Use the project base URL, not the /rest/v1 endpoint.",
+  );
 });
 
 console.log("All LifeQuest XP checks passed.");

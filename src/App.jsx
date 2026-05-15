@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
 import { Activity, BarChart3, ClipboardPenLine, Settings as SettingsIcon, Shield, UserRound } from "lucide-react";
 import { AuthGate } from "./components/AuthGate.jsx";
+import { PasswordResetGate } from "./components/PasswordResetGate.jsx";
 import { Dashboard } from "./pages/Dashboard.jsx";
 import { LogEntry } from "./pages/LogEntry.jsx";
 import { DailyReport } from "./pages/DailyReport.jsx";
@@ -42,6 +43,10 @@ export default function App() {
     );
   }
 
+  if (auth.isPasswordRecovery) {
+    return <PasswordResetGate onUpdatePassword={auth.updatePassword} />;
+  }
+
   if (!auth.currentAccount) {
     return (
       <AuthGate
@@ -49,6 +54,7 @@ export default function App() {
         startupError={auth.authError}
         onLogin={auth.login}
         onRegister={auth.register}
+        onRequestPasswordReset={auth.requestPasswordReset}
       />
     );
   }

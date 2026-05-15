@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { DataManager } from "../components/DataManager.jsx";
+import { LaunchReadinessCard } from "../components/LaunchReadinessCard.jsx";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { isSupabaseConfigured } from "../utils/supabaseClient.js";
 
@@ -221,6 +222,8 @@ export function Settings({
           </p>
         </div>
       </section>
+
+      <LaunchReadinessCard isCloudMode={isCloudMode} isSupabaseReady={isSupabaseConfigured} />
 
       <section className="grid gap-4 lg:grid-cols-2">
         <div className="border-2 border-ink bg-paper p-5 shadow-hard">

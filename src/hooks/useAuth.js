@@ -10,6 +10,8 @@ import {
   loginCloudAccount,
   logoutCloudAccount,
   registerCloudAccount,
+  requestCloudPasswordReset,
+  updateCloudPassword,
 } from "../utils/cloudAuth.js";
 import { withTimeout } from "../utils/asyncTimeout.js";
 import { isSupabaseConfigured, supabase } from "../utils/supabaseClient.js";
@@ -20,6 +22,7 @@ export function useAuth() {
   );
   const [authError, setAuthError] = useState("");
   const [isAuthReady, setIsAuthReady] = useState(!isSupabaseConfigured);
+  const [isPasswordRecovery, setIsPasswordRecovery] = useState(false);
   const authMode = isSupabaseConfigured ? "cloud" : "local";
 
   useEffect(() => {
@@ -55,7 +58,11 @@ export function useAuth() {
 
     const {
       data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsPasswordRecovery(true);
+      }
+
       setTimeout(async () => {
         try {
           const account = session?.user ? await fetchCloudAccount(session.user) : null;
@@ -101,6 +108,23 @@ export function useAuth() {
     }
 
     setCurrentAccount(null);
+    setIsPasswordRecovery(false);
+  }
+
+  async function requestPasswordReset(email) {
+    if (!isSupabaseConfigured) return;
+    await requestCloudPasswordReset(email);
+    setAuthError("");
+  }
+
+  async function updatePassword(passcode) {
+    if (!isSupabaseConfigured) return null;
+
+    const account = await updateCloudPassword(passcode);
+    setAuthError("");
+    setIsPasswordRecovery(false);
+    setCurrentAccount(account);
+    return account;
   }
 
   return {
@@ -108,8 +132,11 @@ export function useAuth() {
     authError,
     currentAccount,
     isAuthReady,
+    isPasswordRecovery,
     register,
     login,
     logout,
+    requestPasswordReset,
+    updatePassword,
   };
 }

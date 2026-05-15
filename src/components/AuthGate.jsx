@@ -1,32 +1,39 @@
 import { LockKeyhole, LogIn, UserPlus } from "lucide-react";
 import { useState } from "react";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
+import { getFriendlyAuthError } from "../utils/authMessages.js";
 
-export function AuthGate({ authMode = "local", startupError = "", onLogin, onRegister }) {
+export function AuthGate({ authMode = "local", startupError = "", onLogin, onRegister, onRequestPasswordReset }) {
   const { language, setLanguage, supportedLanguages, t } = useLanguage();
   const [mode, setMode] = useState("register");
   const [displayName, setDisplayName] = useState("");
   const [email, setEmail] = useState("");
   const [passcode, setPasscode] = useState("");
   const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const isRegistering = mode === "register";
+  const isResettingPassword = mode === "reset";
   const isCloudMode = authMode === "cloud";
-  const visibleError = error || startupError;
+  const visibleError = error || getFriendlyAuthError(startupError, t);
 
   async function handleSubmit(event) {
     event.preventDefault();
     setError("");
+    setNotice("");
     setIsSubmitting(true);
 
     try {
-      if (isRegistering) {
+      if (isResettingPassword) {
+        await onRequestPasswordReset(email);
+        setNotice(t("auth.resetEmailSent"));
+      } else if (isRegistering) {
         await onRegister({ displayName, email, passcode });
       } else {
         await onLogin({ email, passcode });
       }
     } catch (caughtError) {
-      setError(caughtError.message);
+      setError(getFriendlyAuthError(caughtError.message, t));
     } finally {
       setIsSubmitting(false);
     }
@@ -74,17 +81,25 @@ export function AuthGate({ authMode = "local", startupError = "", onLogin, onReg
                 isRegistering ? "bg-ink text-paper" : "bg-white"
               }`}
               type="button"
-              onClick={() => setMode("register")}
+              onClick={() => {
+                setError("");
+                setNotice("");
+                setMode("register");
+              }}
             >
               <UserPlus size={17} />
               {t("auth.register")}
             </button>
             <button
               className={`flex min-h-11 items-center justify-center gap-2 border-2 border-ink px-3 py-2 font-black ${
-                !isRegistering ? "bg-ink text-paper" : "bg-white"
+                !isRegistering && !isResettingPassword ? "bg-ink text-paper" : "bg-white"
               }`}
               type="button"
-              onClick={() => setMode("login")}
+              onClick={() => {
+                setError("");
+                setNotice("");
+                setMode("login");
+              }}
             >
               <LogIn size={17} />
               {t("auth.login")}
@@ -115,17 +130,19 @@ export function AuthGate({ authMode = "local", startupError = "", onLogin, onReg
               />
             </label>
 
-            <label className="grid gap-1 text-xs font-black uppercase text-ink/60">
-              {isCloudMode ? t("auth.password") : t("auth.passcode")}
-              <input
-                className="border-2 border-ink bg-white px-3 py-3 text-base font-bold text-ink outline-none focus:ring-4 focus:ring-ink/15"
-                minLength="6"
-                required
-                type="password"
-                value={passcode}
-                onChange={(event) => setPasscode(event.target.value)}
-              />
-            </label>
+            {!isResettingPassword && (
+              <label className="grid gap-1 text-xs font-black uppercase text-ink/60">
+                {isCloudMode ? t("auth.password") : t("auth.passcode")}
+                <input
+                  className="border-2 border-ink bg-white px-3 py-3 text-base font-bold text-ink outline-none focus:ring-4 focus:ring-ink/15"
+                  minLength="6"
+                  required
+                  type="password"
+                  value={passcode}
+                  onChange={(event) => setPasscode(event.target.value)}
+                />
+              </label>
+            )}
           </div>
 
           {visibleError && (
@@ -134,8 +151,10 @@ export function AuthGate({ authMode = "local", startupError = "", onLogin, onReg
             </p>
           )}
 
+          {notice && <p className="mt-4 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-moss">{notice}</p>}
+
           <div className="mt-5 border-2 border-ink bg-white p-3 text-sm font-bold text-ink/70">
-            {isCloudMode ? t("auth.cloudWarning") : t("auth.localWarning")}
+            {isResettingPassword ? t("auth.resetHelp") : isCloudMode ? t("auth.cloudWarning") : t("auth.localWarning")}
           </div>
 
           <button
@@ -146,12 +165,28 @@ export function AuthGate({ authMode = "local", startupError = "", onLogin, onReg
             {isRegistering ? <UserPlus size={18} /> : <LogIn size={18} />}
             {isSubmitting
               ? t("auth.working")
-              : isRegistering
+              : isResettingPassword
+                ? t("auth.sendResetLink")
+                : isRegistering
                 ? isCloudMode
                   ? t("auth.createCloudAccount")
                   : t("auth.createAccount")
                 : t("auth.login")}
           </button>
+
+          {isCloudMode && !isRegistering && (
+            <button
+              className="mt-3 w-full border-2 border-ink bg-white px-3 py-2 text-sm font-black text-ink transition hover:-translate-y-0.5 hover:bg-bolt focus:outline-none focus:ring-4 focus:ring-ink/20"
+              type="button"
+              onClick={() => {
+                setError("");
+                setNotice("");
+                setMode(isResettingPassword ? "login" : "reset");
+              }}
+            >
+              {isResettingPassword ? t("auth.backToLogin") : t("auth.forgotPassword")}
+            </button>
+          )}
         </form>
       </section>
     </main>

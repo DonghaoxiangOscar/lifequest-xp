@@ -79,6 +79,28 @@ export async function loginCloudAccount({ email, passcode }) {
   return fetchCloudAccount(data.user);
 }
 
+export async function requestCloudPasswordReset(email) {
+  const { error } = await withTimeout(
+    supabase.auth.resetPasswordForEmail(email.trim().toLowerCase(), {
+      // Password reset links should return to the same app base path as email confirmation links.
+      redirectTo: getAuthRedirectUrl(),
+    }),
+    "Password reset request took too long. Please check your connection and try again.",
+  );
+
+  if (error) throw new Error(error.message);
+}
+
+export async function updateCloudPassword(passcode) {
+  const { data, error } = await withTimeout(
+    supabase.auth.updateUser({ password: passcode }),
+    "Password update took too long. Please check your connection and try again.",
+  );
+
+  if (error) throw new Error(error.message);
+  return fetchCloudAccount(data.user);
+}
+
 export async function logoutCloudAccount() {
   const { error } = await supabase.auth.signOut();
   if (error) throw new Error(error.message);

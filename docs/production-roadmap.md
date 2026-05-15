@@ -40,6 +40,7 @@ Current state:
 - Local registration/login gate.
 - Per-account local activity logs.
 - Optional Supabase Auth integration when `VITE_SUPABASE_URL` and `VITE_SUPABASE_ANON_KEY` are configured.
+- Cloud-mode password reset is available through Supabase Auth.
 - Optional Supabase Postgres tables for profiles, entries, parsed activities, settings, and daily summaries.
 - Row-level security policies are included in `supabase/schema.sql`.
 - New local accounts start empty.
@@ -48,7 +49,7 @@ Current state:
 - Demo data is loaded only when the user clicks the Demo action.
 - Passcode hashes are stored locally for MVP convenience.
 - JSON export and import backup.
-- Settings now includes account status, sync status, sync retry, backup/import controls, safe data clearing, beta feedback, beta privacy copy, and beta terms.
+- Settings now includes account status, sync status, sync retry, launch readiness, backup/import controls, safe data clearing, beta feedback, beta privacy copy, and beta terms.
 - Cloud data clearing deletes LifeQuest activity entries and daily summaries under the signed-in user's RLS scope.
 
 Remaining production work:
@@ -56,6 +57,7 @@ Remaining production work:
 - Create a Supabase project and run `supabase/schema.sql`.
 - Add production Supabase environment variables in Vercel or Netlify.
 - For GitHub Pages, add `VITE_SUPABASE_URL` as a repository variable and `VITE_SUPABASE_ANON_KEY` as a repository secret.
+- Configure Supabase custom SMTP before inviting a larger beta group.
 - Test sign-up, login, logout, import, delete, and cross-device sync with real test users.
 - Add a secure backend or Edge Function for full Supabase Auth account deletion before a broader launch.
 
@@ -113,6 +115,7 @@ Current state:
 - App builds with Vite.
 - GitHub Pages can host the static public beta.
 - Vercel and Netlify can host the app with Supabase environment variables.
+- Vercel and Netlify configs include baseline security headers.
 
 Run:
 

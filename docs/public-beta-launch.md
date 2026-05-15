@@ -11,16 +11,19 @@ This document describes the first public-test version of LifeQuest XP.
 - Empty dashboards offer quick-start actions for a first real log.
 - Users can log activities with text, quick actions, or supported browser voice input.
 - The app parses activities locally and calculates Growth locally.
+- Cloud-mode users can request a password reset through Supabase Auth.
 - Users can switch display language in Settings.
 - Users can export, import, or clear app data from Profile and Settings.
-- Settings includes account status, sync status, a retry action, a privacy note, beta terms, beta feedback template, and an account deletion request template.
+- Settings includes account status, sync status, a retry action, a launch-readiness checklist, a privacy note, beta terms, beta feedback template, and an account deletion request template.
 - The app can be built as a static Vite site.
+- Vercel and Netlify configs include baseline security headers.
 - Supabase schema and row-level security policies are included in `supabase/schema.sql`.
 
 ## Current Limitations
 
 - Local mode accounts do not sync across devices.
 - Cloud sync requires creating a Supabase project, running the SQL schema, and setting deployment environment variables.
+- Password reset emails still depend on Supabase email delivery; configure custom SMTP before inviting a larger test group.
 - AI parser/report endpoints are only designed as placeholders.
 - Browser speech support depends on the user's browser.
 - The feedback template is a lightweight beta mechanism, not a full support desk.
@@ -47,6 +50,7 @@ dist
 6. For local-mode testing, invite only a small group and explain that data is local to their browser.
 7. For cloud-mode testing, run `supabase/schema.sql`, then add `VITE_SUPABASE_URL` as a GitHub repository variable and `VITE_SUPABASE_ANON_KEY` as a GitHub repository secret.
 8. Test RLS before inviting users.
+9. Run the public beta test plan in `docs/public-beta-test-plan.md`.
 
 ## Next Production Upgrade
 
@@ -55,6 +59,7 @@ For a real public website, finish:
 - A Supabase project using the included schema.
 - Production env vars in Vercel or Netlify.
 - Email templates and auth redirect URLs.
+- Custom SMTP for Supabase Auth email delivery.
 - Backend AI endpoints for low-confidence parsing and user-requested daily reports.
 - Production-reviewed privacy policy and terms.
 - A backend delete-account endpoint or Supabase Edge Function using service-role credentials safely on the server side.
