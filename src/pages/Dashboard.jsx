@@ -4,10 +4,17 @@ import { ActivityComposer } from "../components/ActivityComposer.jsx";
 import { AttributeBar } from "../components/AttributeBar.jsx";
 import { DailySummaryCard } from "../components/DailySummaryCard.jsx";
 import { EntryCard } from "../components/EntryCard.jsx";
+import { OnboardingPanel } from "../components/OnboardingPanel.jsx";
 import { StatCard } from "../components/StatCard.jsx";
 import { attributes } from "../data/scoringRules.js";
 import { useLanguage } from "../i18n/LanguageContext.jsx";
 import { buildRuleBasedDailyReport } from "../utils/report.js";
+
+const starterActions = [
+  { labelKey: "dashboard.starterStudy", text: "Studied for 30 minutes" },
+  { labelKey: "dashboard.starterExercise", text: "Ran for 20 minutes" },
+  { labelKey: "dashboard.starterMeal", text: "Ate a healthy meal" },
+];
 
 function flattenTodayActivities(todayEntries) {
   return todayEntries.flatMap((entry) => {
@@ -30,12 +37,27 @@ function flattenTodayActivities(todayEntries) {
   });
 }
 
-export function Dashboard({ entries, gameState, onAddEntry, onDeleteEntry, onUpdateEntry, onLoadDemoData }) {
+export function Dashboard({
+  entries,
+  gameState,
+  onAddEntry,
+  onCompleteOnboarding,
+  onDeleteEntry,
+  onNavigate,
+  onUpdateEntry,
+  onLoadDemoData,
+  showOnboarding = false,
+}) {
   const { t } = useLanguage();
   const todayActivities = flattenTodayActivities(gameState.todayEntries);
   const dailyReport = buildRuleBasedDailyReport(gameState, t);
   const recentEntries = entries.slice(0, 3);
   const isFreshAccount = entries.length === 0;
+
+  function addStarterActivity(activityText) {
+    onAddEntry(activityText);
+    onCompleteOnboarding?.();
+  }
 
   return (
     <div className="space-y-6">
@@ -82,6 +104,18 @@ export function Dashboard({ entries, gameState, onAddEntry, onDeleteEntry, onUpd
                     {t("dashboard.loadSample")}
                   </button>
                 )}
+                <div className="mt-4 grid gap-2 sm:grid-cols-3">
+                  {starterActions.map((action) => (
+                    <button
+                      key={action.labelKey}
+                      className="min-h-11 border-2 border-ink bg-white px-3 py-2 text-sm font-black transition hover:-translate-y-0.5 hover:bg-bolt focus:outline-none focus:ring-4 focus:ring-ink/20"
+                      type="button"
+                      onClick={() => addStarterActivity(action.text)}
+                    >
+                      {t(action.labelKey)}
+                    </button>
+                  ))}
+                </div>
               </div>
             )}
           </div>
@@ -89,6 +123,15 @@ export function Dashboard({ entries, gameState, onAddEntry, onDeleteEntry, onUpd
 
         <ActivityComposer gameState={gameState} onAddEntry={onAddEntry} title={t("composer.dashboardTitle")} />
       </section>
+
+      {showOnboarding && (
+        <OnboardingPanel
+          onDismiss={onCompleteOnboarding}
+          onLoadDemoData={onLoadDemoData}
+          onOpenLog={() => onNavigate("log")}
+          onQuickStart={addStarterActivity}
+        />
+      )}
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
         <StatCard

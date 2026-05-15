@@ -22,15 +22,18 @@ export function useEntries(account, initialEntries) {
 
   const storageLabel = isCloud ? "cloud" : "local";
 
-  useEffect(() => {
-    let isMounted = true;
-    const storageKey = getStorageKey(accountId);
+  const loadEntries = useCallback(
+    async ({ keepLoaded = false, isActive = () => true } = {}) => {
+      const storageKey = getStorageKey(accountId);
 
-    async function loadEntries() {
-      setIsLoaded(false);
+      if (!keepLoaded) {
+        setIsLoaded(false);
+      }
+
       setSyncError("");
 
       if (!accountId) {
+        if (!isActive()) return;
         setEntries([]);
         setLoadedKey(null);
         setIsLoaded(true);
@@ -42,14 +45,20 @@ export function useEntries(account, initialEntries) {
 
         try {
           const { data, error } = await withTimeout(
-            supabase.from("activity_entries").select("*").order("created_at", { ascending: false }),
+            supabase
+              .from("activity_entries")
+              .select("*")
+              .eq("user_id", accountId)
+              .order("created_at", { ascending: false }),
             "Activity sync took too long. Please refresh or try again later.",
           );
 
-          if (!isMounted) return;
+          if (!isActive()) return;
 
           if (error) {
-            setEntries([]);
+            if (!keepLoaded) {
+              setEntries([]);
+            }
             setSyncStatus("error");
             setSyncError(error.message);
           } else {
@@ -57,35 +66,49 @@ export function useEntries(account, initialEntries) {
             setSyncStatus("synced");
           }
         } catch (error) {
-          if (!isMounted) return;
-          setEntries([]);
+          if (!isActive()) return;
+          if (!keepLoaded) {
+            setEntries([]);
+          }
           setSyncStatus("error");
           setSyncError(error.message);
         }
 
+        if (!isActive()) return;
         setLoadedKey(null);
         setIsLoaded(true);
         return;
       }
 
+      let nextEntries;
+
       try {
         const storedEntries = window.localStorage.getItem(storageKey);
-        setEntries(storedEntries ? JSON.parse(storedEntries) : initialEntries());
+        nextEntries = storedEntries ? JSON.parse(storedEntries) : initialEntries();
       } catch {
-        setEntries(initialEntries());
+        nextEntries = initialEntries();
       }
 
+      if (!isActive()) return;
+      setEntries(nextEntries);
       setLoadedKey(storageKey);
       setSyncStatus("local");
       setIsLoaded(true);
-    }
+    },
+    [accountId, initialEntries, isCloud],
+  );
 
-    loadEntries();
+  const refreshEntries = useCallback(() => loadEntries({ keepLoaded: true }), [loadEntries]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    loadEntries({ isActive: () => isMounted });
 
     return () => {
       isMounted = false;
     };
-  }, [accountId, initialEntries, isCloud]);
+  }, [loadEntries]);
 
   useEffect(() => {
     if (!loadedKey || !isLoaded || isCloud) return;
@@ -229,6 +252,7 @@ export function useEntries(account, initialEntries) {
       deleteEntry,
       replaceEntries,
       clearEntries,
+      refreshEntries,
     }),
     [
       addEntry,
@@ -237,6 +261,7 @@ export function useEntries(account, initialEntries) {
       entries,
       isLoaded,
       replaceEntries,
+      refreshEntries,
       storageLabel,
       syncError,
       syncStatus,

@@ -9,6 +9,7 @@ import { Settings } from "./pages/Settings.jsx";
 import { AppShell } from "./components/AppShell.jsx";
 import { useAuth } from "./hooks/useAuth.js";
 import { useEntries } from "./hooks/useEntries.js";
+import { useOnboarding } from "./hooks/useOnboarding.js";
 import { useLanguage } from "./i18n/LanguageContext.jsx";
 import { createEmptyEntries } from "./utils/initialData.js";
 import { analyzeEntry, analyzeParsedActivities } from "./utils/scoring.js";
@@ -28,6 +29,7 @@ export default function App() {
   const auth = useAuth();
   const { t } = useLanguage();
   const entryStore = useEntries(auth.currentAccount, createEmptyEntries);
+  const onboarding = useOnboarding(auth.currentAccount?.id);
   const entries = entryStore.entries;
 
   const gameState = useMemo(() => buildGameState(entries), [entries]);
@@ -119,6 +121,9 @@ export default function App() {
     onImportEntries: importEntries,
     onClearEntries: clearEntries,
     onLoadDemoData: loadDemoData,
+    onCompleteOnboarding: onboarding.completeOnboarding,
+    onNavigate: setActivePage,
+    onRetrySync: entryStore.refreshEntries,
     currentAccount: auth.currentAccount,
     authMode: auth.authMode,
     isEntriesLoaded: entryStore.isLoaded,
@@ -136,10 +141,11 @@ export default function App() {
       authMode={auth.authMode}
       syncError={entryStore.syncError}
       syncStatus={entryStore.syncStatus}
+      onRetrySync={entryStore.refreshEntries}
       onLogout={auth.logout}
       onLoadDemoData={loadDemoData}
     >
-      {activePage === "dashboard" && <Dashboard {...pageProps} />}
+      {activePage === "dashboard" && <Dashboard {...pageProps} showOnboarding={onboarding.isOnboardingVisible} />}
       {activePage === "log" && <LogEntry {...pageProps} />}
       {activePage === "report" && <DailyReport {...pageProps} />}
       {activePage === "profile" && <Profile {...pageProps} />}

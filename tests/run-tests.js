@@ -9,6 +9,7 @@ import { buildRuleBasedDailyReport } from "../src/utils/report.js";
 import { activitiesToRows, entryToRow, rowToEntry } from "../src/utils/cloudEntries.js";
 import { isSupabaseConfigured } from "../src/utils/supabaseClient.js";
 import { buildAuthRedirectUrl } from "../src/utils/cloudAuth.js";
+import { getOnboardingStorageKey } from "../src/hooks/useOnboarding.js";
 
 function runTest(name, testFn) {
   try {
@@ -106,12 +107,16 @@ runTest("new accounts start with empty entries and zero stats", () => {
 runTest("language settings translate public beta UI and reports", () => {
   const gameState = buildGameState([]);
   const t = (key, params) => translate("zh", key, params);
+  const en = (key, params) => translate("en", key, params);
   const report = buildRuleBasedDailyReport(gameState, t);
 
   assert.equal(t("nav.settings"), "设置");
   assert.equal(t("settings.publicBeta"), "公开测试模式");
   assert.equal(t("settings.accountTitle"), "账号中心");
   assert.equal(t("settings.termsTitle"), "Beta 条款");
+  assert.equal(t("sync.retry"), "重试同步");
+  assert.notEqual(t("onboarding.title"), "onboarding.title");
+  assert.equal(en("settings.feedbackTitle"), "Beta Feedback");
   assert.equal(report.suggestions[0], "先记录一个小行动，启动今天的连续链。");
 });
 
@@ -138,6 +143,11 @@ runTest("email confirmation redirects keep the GitHub Pages base path", () => {
     buildAuthRedirectUrl("https://donghaoxiangoscar.github.io", "/lifequest-xp/"),
     "https://donghaoxiangoscar.github.io/lifequest-xp/",
   );
+});
+
+runTest("onboarding state is scoped per signed-in account", () => {
+  assert.equal(getOnboardingStorageKey("user-123"), "lifequest-xp.onboarding.v1.user-123");
+  assert.equal(getOnboardingStorageKey(""), null);
 });
 
 console.log("All LifeQuest XP checks passed.");

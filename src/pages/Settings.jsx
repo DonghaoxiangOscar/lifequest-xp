@@ -6,6 +6,8 @@ import {
   Database,
   Globe2,
   LogOut,
+  MessageSquareText,
+  RefreshCw,
   Rocket,
   ShieldCheck,
   Sparkles,
@@ -24,6 +26,7 @@ export function Settings({
   onClearEntries,
   onImportEntries,
   onLogout,
+  onRetrySync,
   syncError = "",
   syncStatus = "idle",
 }) {
@@ -56,6 +59,22 @@ export function Settings({
       setNotice(t("settings.deletionRequestCopied"));
     } catch {
       setNotice(requestText);
+    }
+  }
+
+  async function copyFeedbackTemplate() {
+    const feedbackText = t("settings.feedbackTemplate", {
+      email: accountEmail,
+      logs: entries.length,
+      mode: authMode,
+      syncStatus: t(`sync.${syncStatus}`),
+    });
+
+    try {
+      await navigator.clipboard.writeText(feedbackText);
+      setNotice(t("settings.feedbackCopied"));
+    } catch {
+      setNotice(feedbackText);
     }
   }
 
@@ -105,8 +124,20 @@ export function Settings({
 
           {syncError && <p className="mt-3 border-2 border-ink bg-white px-3 py-2 text-sm font-bold text-ember">{syncError}</p>}
 
+          {onRetrySync && (
+            <button
+              className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-bolt px-3 py-2 font-black transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-ink/20 disabled:cursor-not-allowed disabled:bg-ink/10 disabled:text-ink/40"
+              type="button"
+              disabled={syncStatus === "syncing"}
+              onClick={onRetrySync}
+            >
+              <RefreshCw size={18} className={syncStatus === "syncing" ? "animate-spin" : ""} />
+              {t("sync.retry")}
+            </button>
+          )}
+
           <button
-            className="mt-4 flex min-h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-white px-3 py-2 font-black transition hover:-translate-y-0.5 hover:bg-bolt focus:outline-none focus:ring-4 focus:ring-ink/20"
+            className="mt-3 flex min-h-11 w-full items-center justify-center gap-2 border-2 border-ink bg-white px-3 py-2 font-black transition hover:-translate-y-0.5 hover:bg-bolt focus:outline-none focus:ring-4 focus:ring-ink/20"
             type="button"
             onClick={onLogout}
           >
@@ -206,6 +237,26 @@ export function Settings({
             <h3 className="font-display text-2xl font-black uppercase">{t("settings.privacyTitle")}</h3>
           </div>
           <p className="mt-3 text-sm font-semibold text-ink/70">{t("settings.privacyCopy")}</p>
+        </div>
+      </section>
+
+      <section className="border-2 border-ink bg-paper p-5 shadow-hard sm:p-6">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+          <div>
+            <div className="flex items-center gap-2">
+              <MessageSquareText size={22} />
+              <h3 className="font-display text-2xl font-black uppercase">{t("settings.feedbackTitle")}</h3>
+            </div>
+            <p className="mt-2 max-w-3xl text-sm font-semibold text-ink/70">{t("settings.feedbackCopy")}</p>
+          </div>
+          <button
+            className="flex min-h-12 items-center justify-center gap-2 border-2 border-ink bg-bolt px-4 py-3 font-black text-ink shadow-hard transition hover:-translate-y-0.5 focus:outline-none focus:ring-4 focus:ring-ink/20"
+            type="button"
+            onClick={copyFeedbackTemplate}
+          >
+            <Clipboard size={18} />
+            {t("settings.copyFeedback")}
+          </button>
         </div>
       </section>
 

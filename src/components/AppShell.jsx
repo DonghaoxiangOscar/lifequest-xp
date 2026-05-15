@@ -12,6 +12,7 @@ export function AppShell({
   onNavigate,
   onLogout,
   onLoadDemoData,
+  onRetrySync,
 }) {
   const { t } = useLanguage();
   const StorageIcon = authMode === "cloud" ? Cloud : HardDrive;
@@ -47,7 +48,20 @@ export function AppShell({
                   <RefreshCw size={12} className={syncStatus === "syncing" ? "animate-spin" : ""} />
                   {t(`sync.${syncStatus}`)}
                 </span>
-                {syncError && <span className="mt-1 max-w-44 truncate text-[11px] text-ember">{syncError}</span>}
+                {syncError && (
+                  <span className="mt-1 flex flex-wrap items-center gap-2 text-[11px] text-ember">
+                    <span className="max-w-44 truncate">{syncError}</span>
+                    {onRetrySync && (
+                      <button
+                        className="border border-ember bg-white px-1.5 py-0.5 font-black text-ember transition hover:bg-ember hover:text-paper focus:outline-none focus:ring-2 focus:ring-ember/20"
+                        type="button"
+                        onClick={onRetrySync}
+                      >
+                        {t("sync.retry")}
+                      </button>
+                    )}
+                  </span>
+                )}
               </div>
             )}
 

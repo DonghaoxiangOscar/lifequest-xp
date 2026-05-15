@@ -43,10 +43,12 @@ Current state:
 - Optional Supabase Postgres tables for profiles, entries, parsed activities, settings, and daily summaries.
 - Row-level security policies are included in `supabase/schema.sql`.
 - New local accounts start empty.
+- First-time onboarding is stored per account so returning testers are not shown the same guide every visit.
+- Empty dashboards include quick-start actions for creating the first real log.
 - Demo data is loaded only when the user clicks the Demo action.
 - Passcode hashes are stored locally for MVP convenience.
 - JSON export and import backup.
-- Settings now includes account status, sync status, backup/import controls, safe data clearing, beta privacy copy, and beta terms.
+- Settings now includes account status, sync status, sync retry, backup/import controls, safe data clearing, beta feedback, beta privacy copy, and beta terms.
 - Cloud data clearing deletes LifeQuest activity entries and daily summaries under the signed-in user's RLS scope.
 
 Remaining production work:
@@ -131,4 +133,5 @@ Production notes:
 - Keep Supabase service-role keys out of the frontend.
 - Use service-role credentials only in a trusted backend when implementing full account deletion.
 - Verify Supabase row-level security before inviting real users.
+- Add a real feedback intake workflow once public beta traffic grows beyond a small test group.
 - Replace beta privacy/terms copy with production-reviewed legal text before a broad launch.
